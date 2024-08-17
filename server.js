@@ -18,9 +18,10 @@ const server = http.createServer(app);
 // Initialize Socket.io on the server
 const io = socketIo(server, {
     cors: {
-        origin: "*", // Update with your frontend URL
+        origin: "*", // Adjust with your frontend URL if needed
         methods: ["GET", "POST"]
-    }
+    },
+    transports: ['websocket', 'polling']
 });
 // Enable Mongoose debug mode
 mongoose.set('debug', true);
