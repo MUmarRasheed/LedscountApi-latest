@@ -16,8 +16,12 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 
 // Initialize Socket.io on the server
-const io = socketIo(server);
-
+const io = socketIo(server, {
+    cors: {
+        origin: "*", // Update with your frontend URL
+        methods: ["GET", "POST"]
+    }
+});
 // Enable Mongoose debug mode
 mongoose.set('debug', true);
 // Middleware
