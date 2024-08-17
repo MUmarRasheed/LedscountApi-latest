@@ -28,47 +28,47 @@ socket.on('connect', () => {
     });
     console.log('Sent setMatchSettings event');
 
-    // Test emitting 'scoreUpdate' event
-    socket.emit('scoreUpdate', {
-        "deviceID": "4030F952Ch6",
-        "matchScore": {
-            "playing": true,
-            "started": "2024-07-09T17:23:34.008",
-            "lastPointMade": "2024-07-09T18:46:11.375",
-            "teamServing": "R",
-            "score": [
-                {
-                    "team": "R",
-                    "s1": 5,
-                    "s2": 6,
-                    "s3": 5,
-                    "p": "40"
-                },
-                {
-                    "team": "B",
-                    "s1": 5,
-                    "s2": 4,
-                    "s3": 3,
-                    "p": "30"
-                }
-            ]
-        }
-    });
-});
+// Request club data
+const clubID = "453f49e3-990d-475d-a761-502c4f011be";
+
+socket.emit('getClub', clubID);
+console.log('Sent getClub request');
 console.log('Sent scoreUpdate event');
+
+socket.emit('getMatches', clubID);
+console.log('Sent getMatches request');
+
+// Listen for 'getMatchesData' event from the server
+socket.on('getMatchesData', (data) => {
+    if (data.message) {
+        console.log('Matches update message:', data.message);
+    } else {
+        console.log('Received matches update:', data.matches);
+    }
+});
 
 // Listen for 'setMatchSettings' event from the server
 socket.on('setMatchSettings', (data) => {
     console.log('Received match settings update:', data);
 });
 
-// Listen for 'scoreUpdate' event from the server
-socket.on('scoreUpdate', (data) => {
-    console.log('Received score update:', data);
+// Listen for 'getMatchSettings' event from the server
+socket.on('getMatchSettings', (data) => {
+    console.log('Received getMatchSettings:', data);
 });
 
+// Listen for 'clubUpdate' event from the server
+socket.on('getClubData', (data) => {
+    if (data.message) {
+        console.log('Club update message:', data.message);
+    } else {
+        console.log('Received club update:', data.club);
+    }
+});
 
 // Handle disconnection
 socket.on('disconnect', () => {
     console.log('Disconnected from server');
 });
+
+})

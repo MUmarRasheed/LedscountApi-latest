@@ -7,6 +7,7 @@ const databaseConfig = require('./config/databaseConnection');
 const http = require('http');
 const socketIo = require('socket.io');
 const Device = require('./models/device'); // Import the Device model
+const Club = require('./models/club'); // Import the Device model
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,6 +18,8 @@ const server = http.createServer(app);
 // Initialize Socket.io on the server
 const io = socketIo(server);
 
+// Enable Mongoose debug mode
+mongoose.set('debug', true);
 // Middleware
 app.use(bodyParser.json());
 
@@ -39,7 +42,7 @@ app.use(clubRoutes);
 io.on('connection', (socket) => {
     console.log('New client connected');
 
-    // Listen for 'setMatchSettings' event from clients
+    // // // Listen for 'setMatchSettings' event from clients
     socket.on('setMatchSettings', async (data) => {
         console.log('Received setMatchSettings event:', data);
 
@@ -52,34 +55,48 @@ io.on('connection', (socket) => {
             );
 
             if (device) {
-                console.log('Match settings updated', device);
+                socket.emit('getMatchSettings',{ deviceID: device.deviceID, courtNumber:device.courtNumber,testMode: device.testMode, matchSettings: device.matchSettings 
+                })
             } else {
-                console.log('Device not found');
+                socket.emit('getMatchSettings','no match found')
             }
         } catch (error) {
             console.error('Error updating match settings:', error);
         }
     });
 
-    // Listen for 'scoreUpdate' event from clients
-    socket.on('scoreUpdate', async (data) => {
-        console.log('Received scoreUpdate event:', data);
+    // Emit a club update when a club is fetched
+    socket.on('getClub', async (clubID) => {
+        console.log('Received getClub request:', clubID); // Check what is received
 
         try {
-            // Update the match score in the database
-            const device = await Device.findOneAndUpdate(
-                { deviceID: data.deviceID },
-                { matchScore: data.matchScore },
-                { new: true }
-            );
-
-            if (device) {
-                console.log('Match score updated in the database:', device);
+            const club = await Club.findOne({ clubID });  // Ensure no leading/trailing spaces
+            console.log('club: ', club);
+            if (club) {
+                socket.emit('getClubData', { clubID: club.clubID, club });
             } else {
-                console.log('Device not found in the database');
+                socket.emit('getClubData', { message: 'Club not found' });
             }
         } catch (error) {
-            console.error('Error updating match score:', error);
+            console.error('Error fetching club:', error);
+        }
+    });
+
+
+    // Handle getMatches request
+    socket.on('getMatches', async (clubID) => {
+        console.log('Received getMatches request for clubID:', clubID);
+
+        try {
+            const matches = await Device.find({ clubID: clubID });
+            if (matches.length > 0) {
+                socket.emit('getMatchesData', { clubID: clubID, matches });
+            } else {
+                socket.emit('getMatchesData', { message: 'No matches found for this club' });
+            }
+        } catch (error) {
+            console.error('Error fetching matches:', error);
+            socket.emit('getMatchesData', { message: 'Error fetching matches' });
         }
     });
 
