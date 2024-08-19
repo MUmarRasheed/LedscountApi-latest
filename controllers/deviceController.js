@@ -1,5 +1,4 @@
 const Device = require('../models/device');
-const io = require('../server')
 
 const setDevice = async (req, res) => {
   try {
@@ -46,10 +45,6 @@ const setMatchSettings = async (req, res) => {
         return res.status(404).send({ message: "device not found"});
     }
 
-    // Emit the updated settings to all connected clients
-    io.emit('setMatchSettings', { deviceID: req.body.deviceID, matchSettings: req.body.matchSettings });
-    console.log('setMatchSettings event emitted:', { deviceID: req.body.deviceID, matchSettings: req.body.matchSettings });
-
     res.send(device);
   } catch (error) {
     res.status(400).send(error);
@@ -78,10 +73,6 @@ const setScore = async (req, res) => {
     if (!device) {
         return res.status(404).send({message: "device not found"});
     }
-
-    // Emit the updated score to all connected clients
-    io.emit('scoreUpdate', { deviceID: req.body.deviceID, matchScore: req.body.matchScore });
-    console.log('scoreUpdate event emitted:', { deviceID: req.body.deviceID, matchScore: req.body.matchScore });
 
     res.send(device);
   } catch (error) {
