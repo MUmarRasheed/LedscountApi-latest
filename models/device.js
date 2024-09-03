@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Match Settings Schema
 const matchSettingsSchema = new mongoose.Schema({
   goldenBallMode: { type: Boolean, required: true },
   tieBreakMode: { type: Boolean, required: true },
@@ -16,22 +17,26 @@ const matchSettingsSchema = new mongoose.Schema({
   }
 });
 
+// Score Schema
 const scoreSchema = new mongoose.Schema({
   team: { type: String, required: true },
   s1: { type: Number, required: true },
   s2: { type: Number, required: true },
   s3: { type: Number, required: true },
-  p: { type: String, required: true }
+  p: { type: Number, required: true } // Changed from String to Number
 });
 
+// Match Score Schema
 const matchScoreSchema = new mongoose.Schema({
   playing: { type: Boolean, required: true },
-  started: { type: Date, required: true },
-  lastPointMade: { type: Date, required: true },
+  started: { type: Date }, // Made optional
+  lastPointMade: { type: Date }, // Made optional
   teamServing: { type: String, required: true },
-  score: [scoreSchema]
+  score: [scoreSchema],
+  temperature: { type: Number } // Added temperature field
 });
 
+// Device Schema
 const deviceSchema = new mongoose.Schema({
   deviceID: { type: String, required: true },
   clubID: { type: String, required: true },
