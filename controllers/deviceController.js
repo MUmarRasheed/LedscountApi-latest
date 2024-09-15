@@ -154,12 +154,16 @@ const getMatches = async (req, res) => {
                 temperature: 1
             }
         })
-        .sort({ courtNumber: 1 }); // Sort by courtNumber in ascending order
 
         if (matches.length === 0) {
             return res.status(404).json({ message: "No matches found" });
         }
-
+        // Convert courtNumber to number and sort in JavaScript
+        matches.sort((a, b) => {
+          const numA = parseFloat(a.courtNumber);
+          const numB = parseFloat(b.courtNumber);
+          return numA - numB;
+        });
         res.status(200).json({ matches });
     } catch (err) {
         res.status(500).json({ error: err.message });
