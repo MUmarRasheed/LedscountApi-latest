@@ -153,7 +153,8 @@ const getMatches = async (req, res) => {
                 score: 1,
                 temperature: 1
             }
-        });
+        })
+        .sort({ courtNumber: 1 }); // Sort by courtNumber in ascending order
 
         if (matches.length === 0) {
             return res.status(404).json({ message: "No matches found" });
