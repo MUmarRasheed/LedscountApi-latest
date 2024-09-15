@@ -150,7 +150,8 @@ const getMatches = async (req, res) => {
                 started: 1,
                 lastPointMade: 1,
                 teamServing: 1,
-                score: 1
+                score: 1,
+                temperature: 1
             }
         });
 

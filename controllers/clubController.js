@@ -2,8 +2,15 @@ const Club = require('../models/club');
 
 const setClub = async (req, res) => {
   try {
-    const club = new Club(req.body);
-    await club.save();
+    const { clubID, ...updateData } = req.body;
+
+    // Use findOneAndUpdate with the upsert option to either update or create the document
+    const club = await Club.findOneAndUpdate(
+      { clubID }, // Search by clubID
+      { $set: updateData }, // Update fields
+      { new: true, upsert: true, runValidators: true } // Options: create new if not found, return updated doc, validate
+    );
+
     res.status(201).send(club);
   } catch (error) {
     res.status(400).send(error);
