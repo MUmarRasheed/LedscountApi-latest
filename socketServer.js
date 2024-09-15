@@ -78,9 +78,19 @@ io.on('connection', (socket) => {
     // Handle getMatches request
     socket.on('getMatches', async (clubID) => {
         console.log('Received getMatches request for clubID:', clubID);
-
+    
         try {
-            const matches = await Device.find({ clubID: clubID });
+            // Fetch matches from MongoDB
+            const matches = await Device.find({ clubID: clubID })
+                .exec();
+    
+            // Sort matches by courtNumber numerically in JavaScript
+            matches.sort((a, b) => {
+                const numA = parseFloat(a.courtNumber);
+                const numB = parseFloat(b.courtNumber);
+                return numA - numB;
+            });
+    
             if (matches.length > 0) {
                 socket.emit('getMatchesData', { clubID: clubID, matches });
             } else {
