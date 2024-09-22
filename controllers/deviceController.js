@@ -1,4 +1,5 @@
 const Device = require('../models/device');
+const Club = require('../models/club')
 
 const setDevice = async (req, res) => {
   try {
@@ -170,4 +171,88 @@ const getMatches = async (req, res) => {
     }
 };
 
-module.exports = { getMatchSettings, setMatchSettings, setDevice, getDevice , getMatches, deleteDevice, setScore }
+const getClubsAndCourts = async (req, res) => {
+  try {
+    const { clubID, deviceID, firmwareVersion } = req.query;
+    const query = {};
+
+    // Building query conditions based on the input parameters
+    if (clubID) query["clubID"] = clubID;
+    if (deviceID) query["courts.deviceID"] = deviceID;
+    if (firmwareVersion) query["courts.firmwareVersion"] = firmwareVersion;
+
+    // Aggregating clubs and their courts
+    const clubs = await Club.aggregate([
+      {
+        $lookup: {
+          from: 'devices', // Assuming 'devices' is the collection for devices
+          localField: 'clubID',
+          foreignField: 'clubID',
+          as: 'courts'
+        }
+      },
+      {
+        $match: query // Apply the filters
+      },
+      {
+        $addFields: {
+          club: {
+            clubID: "$clubID",
+            clubName: "$clubName",
+            clubCity: "$clubCity",
+            hubID: "$hubID",
+            courts: "$courts"
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0, // Exclude _id
+          club: {
+            clubID: 1,
+            clubName: 1,
+            clubCity: 1,
+            hubID: 1,
+            courts: {
+              $map: {
+                input: "$courts",
+                as: "court",
+                in: {
+                  deviceID: "$$court.deviceID",
+                  courtNumber: "$$court.courtNumber",
+                  firmwareVersion: "$$court.firmwareVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]);
+
+    // If no clubs are found
+    if (clubs.length === 0) {
+      return res.status(404).json({ message: "No clubs found" });
+    }
+
+    // Sorting by clubName ASC
+    clubs.sort((a, b) => {
+      const clubNameA = a.club.clubName.toLowerCase();
+      const clubNameB = b.club.clubName.toLowerCase();
+      return clubNameA.localeCompare(clubNameB);
+    });
+
+    // Sort courts within each club by courtNumber ASC
+    clubs.forEach(club => {
+      club.club.courts.sort((courtA, courtB) => {
+        return parseInt(courtA.courtNumber) - parseInt(courtB.courtNumber);
+      });
+    });
+
+    res.status(200).json({ clubs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+module.exports = { getMatchSettings, setMatchSettings, setDevice, getDevice , getMatches, deleteDevice, setScore, getClubsAndCourts }
