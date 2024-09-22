@@ -236,8 +236,8 @@ const getClubsAndCourts = async (req, res) => {
 
     // Sorting by clubName ASC
     clubs.sort((a, b) => {
-      const clubNameA = a.club.clubName.toLowerCase();
-      const clubNameB = b.club.clubName.toLowerCase();
+      const clubNameA = a.club.clubName ? a.club.clubName.toLowerCase() : '';
+      const clubNameB = b.club.clubName ? b.club.clubName.toLowerCase() : '';
       return clubNameA.localeCompare(clubNameB);
     });
 
