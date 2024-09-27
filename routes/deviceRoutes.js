@@ -10,5 +10,6 @@ router.get('/getMatchSettings/:deviceID', deviceController.getMatchSettings);
 router.post('/setScore', deviceController.setScore);
 router.get('/getMatches', deviceController.getMatches);
 router.get('/getDevices', deviceController.getClubsAndCourts);
+router.get('/setHeartBeat', deviceController.setHeartBeat);
 
 module.exports = router;

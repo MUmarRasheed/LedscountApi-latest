@@ -1,5 +1,3 @@
-// socketServer.js
-
 const http = require('http');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
@@ -29,11 +27,34 @@ mongoose.connect(databaseConfig.url, {}).then(() => {
     console.log('Failed to connect to the database', err);
 });
 
+// Helper function to check if a device is online
+const isDeviceOnline = (lastSeen) => {
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000); // 2 minutes ago
+    return lastSeen >= twoMinutesAgo;
+};
+
+// Periodic check for device statuses every 10 seconds
+setInterval(async () => {
+    try {
+        const devices = await Device.find(); // Fetch all devices
+
+        // Create an array of status updates
+        const statusUpdates = devices.map(device => ({
+            deviceID: device.deviceID,
+            online: isDeviceOnline(device.lastSeen)
+        }));
+
+        // Emit the status updates to all connected clients
+        io.emit('deviceStatusUpdate', statusUpdates);
+    } catch (error) {
+        console.error('Error checking device statuses:', error);
+    }
+}, 10000); // 10 seconds interval
+
 // WebSocket connection handler
 io.on('connection', (socket) => {
     console.log('New client connected');
 
- 
     // Listen for 'setMatchSettings' event from clients
     socket.on('setMatchSettings', async (data) => {
         console.log('Received setMatchSettings event:', data);
@@ -47,10 +68,14 @@ io.on('connection', (socket) => {
             );
 
             if (device) {
-                socket.emit('getMatchSettings',{ deviceID: device.deviceID, courtNumber:device.courtNumber,testMode: device.testMode, matchSettings: device.matchSettings 
-                })
+                socket.emit('getMatchSettings', {
+                    deviceID: device.deviceID,
+                    courtNumber: device.courtNumber,
+                    testMode: device.testMode,
+                    matchSettings: device.matchSettings
+                });
             } else {
-                socket.emit('getMatchSettings','no match found')
+                socket.emit('getMatchSettings', 'no match found');
             }
         } catch (error) {
             console.error('Error updating match settings:', error);
@@ -80,11 +105,8 @@ io.on('connection', (socket) => {
         console.log('Received getMatches request for clubID:', clubID);
     
         try {
-            // Fetch matches from MongoDB
-            const matches = await Device.find({ clubID: clubID })
-                .exec();
+            const matches = await Device.find({ clubID }).exec();
     
-            // Sort matches by courtNumber numerically in JavaScript
             matches.sort((a, b) => {
                 const numA = parseFloat(a.courtNumber);
                 const numB = parseFloat(b.courtNumber);
@@ -92,7 +114,7 @@ io.on('connection', (socket) => {
             });
     
             if (matches.length > 0) {
-                socket.emit('getMatchesData', { clubID: clubID, matches });
+                socket.emit('getMatchesData', { clubID, matches });
             } else {
                 socket.emit('getMatchesData', { message: 'No matches found for this club' });
             }

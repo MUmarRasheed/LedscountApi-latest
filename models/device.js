@@ -44,7 +44,8 @@ const deviceSchema = new mongoose.Schema({
   courtNumber: { type: String, required: true },
   firmwareVersion: { type: String, required: true },
   matchSettings: matchSettingsSchema,
-  matchScore: matchScoreSchema
+  matchScore: matchScoreSchema,
+  lastSeen: { type: Date }, // Add this field for the heartbeat functionality
 });
 
 module.exports = mongoose.model('Device', deviceSchema);

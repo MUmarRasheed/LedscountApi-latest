@@ -27,18 +27,21 @@ const setDevice = async (req, res) => {
   }
 };
 
-
 const getDevice = async (req, res) => {
   try {
-    const device = await Device.findOne({ deviceID: req.params.deviceID },{ deviceID: 1, clubID: 1, courtNumber: 1, firmwareVersion: 1 });
+    const device = await Device.findOne(
+      { deviceID: req.params.deviceID },
+      { deviceID: 1, clubID: 1, courtNumber: 1, firmwareVersion: 1, lastSeen: 1 } // Include lastSeen in the response
+    );
     if (!device) {
-      return res.status(404).send({message: "device not found"});
+      return res.status(404).send({ message: "Device not found" });
     }
     res.send(device);
   } catch (error) {
     res.status(500).send(error);
   }
 };
+
 
 const deleteDevice = async (req, res) => {
   try {
@@ -254,5 +257,30 @@ const getClubsAndCourts = async (req, res) => {
   }
 };
 
+const setHeartBeat = async (req, res) => {
+  try {
+    const { deviceID } = req.query; // Using query parameters for GET
 
-module.exports = { getMatchSettings, setMatchSettings, setDevice, getDevice , getMatches, deleteDevice, setScore, getClubsAndCourts }
+    // Validate deviceID is provided
+    if (!deviceID) {
+      return res.status(400).send({ error: 'deviceID is required' });
+    }
+
+    // Update lastSeen timestamp for the device
+    const device = await Device.findOneAndUpdate(
+      { deviceID },
+      { lastSeen: new Date() }, // Update lastSeen with current timestamp
+      { new: true }
+    );
+
+    if (!device) {
+      return res.status(404).send({ message: 'Device not found' });
+    }
+
+    res.status(200).send({ status: 'success' });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+module.exports = { getMatchSettings, setMatchSettings, setDevice, getDevice, getMatches, deleteDevice, setScore, getClubsAndCourts, setHeartBeat };
