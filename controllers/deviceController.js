@@ -103,7 +103,8 @@ const setScore = async (req, res) => {
       'matchScore.teamServing': matchScore.teamServing,
       'matchScore.score': matchScore.score,
       'matchScore.temperature': matchScore.temperature,
-      'matchScore.lastPointMade': new Date() // Update lastPointMade to current time
+      'matchScore.lastPointMade': new Date(), // Update lastPointMade to current time
+      'lastSeen': new Date() // Also update the lastSeen timestamp to reset the heartbeat timer
     };
 
     // If the match is no longer playing, set the 'started' field if not already set
