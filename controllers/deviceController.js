@@ -59,7 +59,13 @@ const setMatchSettings = async (req, res) => {
   try {
     const device = await Device.findOneAndUpdate(
       { deviceID: req.body.deviceID },
-      { testMode: req.body.testMode, matchSettings: req.body.matchSettings },
+      { 
+        testMode: req.body.testMode, 
+        matchSettings: {
+          ...req.body.matchSettings,
+          language: req.body.matchSettings.language // Ensure language is included
+        } 
+      },
       { new: true }
     );
 
@@ -81,7 +87,12 @@ const getMatchSettings = async (req, res) => {
     if (!device) {
         return res.status(404).send({message: "device not found"});
     }
-    res.send({ deviceID: device.deviceID, courtNumber:device.courtNumber,testMode: device.testMode, matchSettings: device.matchSettings });
+    res.send({ 
+      deviceID: device.deviceID, 
+      courtNumber: device.courtNumber, 
+      testMode: device.testMode,
+      matchSettings: device.matchSettings 
+    });
   } catch (error) {
     res.status(500).send(error);
   }
@@ -148,7 +159,8 @@ const getMatches = async (req, res) => {
                 tieBreakMode: 1,
                 tieBreakGames: 1,
                 setsToWinMatch: 1,
-                sound: 1
+                sound: 1,
+                language: 1 // Include language in the selection
             },
             matchScore: {
                 playing: 1,

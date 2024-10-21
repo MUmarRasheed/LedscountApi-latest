@@ -7,6 +7,7 @@ const matchSettingsSchema = new mongoose.Schema({
   tieBreakGames: { type: Number, required: true },
   setsToWinMatch: { type: Number, required: true },
   sound: { type: Boolean, required: true },
+  language: { type: String, required: false, minlength: 2, maxlength: 2 }, // ISO 639 Language Code
   teamRed: {
     player1: { type: String, required: false },
     player2: { type: String, required: false }

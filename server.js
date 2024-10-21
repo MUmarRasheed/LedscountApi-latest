@@ -7,14 +7,25 @@ const databaseConfig = require('./config/databaseConnection');
 const http = require('http');
 const socketIo = require('socket.io');
 const Device = require('./models/device'); // Import the Device model
-const Club = require('./models/club'); // Import the Device model
+const Language = require('./models/language'); // Import the Device model
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Create server using HTTP
 const server = http.createServer(app);
-
+const languages = [
+    { languageName: 'Dutch', languageCode: 'nl' },
+    { languageName: 'English', languageCode: 'en' },
+    { languageName: 'Spanish', languageCode: 'es' }
+  ];
+  
+  const populateLanguages = async () => {
+    await Language.insertMany(languages);
+  };
+  
+  // Call this function when your application starts
+//   populateLanguages();
 // // Initialize Socket.io on the server
 // const io = socketIo(server, {
 //     cors: {
