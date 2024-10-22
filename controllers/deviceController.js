@@ -84,14 +84,24 @@ const setMatchSettings = async (req, res) => {
 const getMatchSettings = async (req, res) => {
   try {
     const device = await Device.findOne({ deviceID: req.params.deviceID });
+
     if (!device) {
-        return res.status(404).send({message: "device not found"});
+      return res.status(404).send({ message: "device not found"});
     }
+
+    // Check if the game is not playing and reset the score
+    if (!device.matchScore.playing) {
+      // Reset the score to empty state
+      device.matchScore.score = []; // Clear the score
+      device.matchScore.teamServing = null; // Optionally clear the team serving
+    }
+
     res.send({ 
       deviceID: device.deviceID, 
       courtNumber: device.courtNumber, 
       testMode: device.testMode,
-      matchSettings: device.matchSettings 
+      matchSettings: device.matchSettings,
+      matchScore: device.matchScore // Include the reset score in the response
     });
   } catch (error) {
     res.status(500).send(error);
