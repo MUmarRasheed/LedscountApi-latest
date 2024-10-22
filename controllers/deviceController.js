@@ -100,8 +100,7 @@ const getMatchSettings = async (req, res) => {
       deviceID: device.deviceID, 
       courtNumber: device.courtNumber, 
       testMode: device.testMode,
-      matchSettings: device.matchSettings,
-      matchScore: device.matchScore // Include the reset score in the response
+      matchSettings: device.matchSettings
     });
   } catch (error) {
     res.status(500).send(error);
