@@ -42,8 +42,8 @@ const deviceSchema = new mongoose.Schema({
   deviceID: { type: String, required: true },
   clubID: { type: String, required: true },
   testMode: { type: Boolean, default: false },
-  courtNumber: { type: String, required: true },
-  firmwareVersion: { type: String, required: true },
+  courtNumber: { type: String, required: false },
+  firmwareVersion: { type: String, required: false },
   matchSettings: matchSettingsSchema,
   matchScore: matchScoreSchema,
   lastSeen: { type: Date }, // Add this field for the heartbeat functionality
