@@ -25,7 +25,7 @@ const languages = [
   };
   
   // Call this function when your application starts
-//   populateLanguages();
+  populateLanguages();
 // // Initialize Socket.io on the server
 // const io = socketIo(server, {
 //     cors: {
